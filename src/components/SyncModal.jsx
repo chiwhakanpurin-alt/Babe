@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useData } from '../context/DataContext';
 import { X, Copy, Download, Upload } from 'lucide-react';
 import './SyncModal.css';
@@ -33,7 +34,7 @@ const SyncModal = ({ onClose }) => {
     }
   };
 
-  return (
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content sync-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
@@ -71,7 +72,8 @@ const SyncModal = ({ onClose }) => {
           {statusMsg && <div className={`sync-status ${statusMsg.includes('❌') ? 'error' : 'success'}`}>{statusMsg}</div>}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

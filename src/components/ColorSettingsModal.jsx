@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useData } from '../context/DataContext';
 import { X, Plus, Trash2, Settings } from 'lucide-react';
 
@@ -28,7 +29,7 @@ const ColorSettingsModal = () => {
         <span>ตั้งค่าสีและป้ายกำกับ</span>
       </button>
 
-      {isOpen && (
+      {isOpen && createPortal(
         <div className="modal-overlay">
           <div className="modal-content">
             <div className="modal-header">
@@ -96,7 +97,8 @@ const ColorSettingsModal = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useData } from '../context/DataContext';
 import TagSelect from './TagSelect';
 import { AlignLeft, X } from 'lucide-react';
@@ -33,7 +34,7 @@ const SpreadsheetRow = ({ row, index }) => {
               </div>
               <AlignLeft size={14} className="longtext-icon" />
               
-              {activeModalCol === col.id && (
+              {activeModalCol === col.id && createPortal(
                 <div className="modal-overlay" onClick={(e) => { e.stopPropagation(); setActiveModalCol(null); }}>
                   <div className="modal-content text-modal" onClick={e => e.stopPropagation()}>
                     <div className="modal-header">
@@ -50,7 +51,8 @@ const SpreadsheetRow = ({ row, index }) => {
                       />
                     </div>
                   </div>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           ) : (
