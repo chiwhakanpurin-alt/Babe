@@ -1,0 +1,66 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { useData } from '../context/DataContext';
+
+const TagSelect = ({ value, optionsGroup, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { selectOptions } = useData();
+  const options = selectOptions[optionsGroup] || [];
+  const dropdownRef = useRef(null);
+
+  const selectedOption = options.find(opt => opt.id === value) || null;
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="tag-select-container" ref={dropdownRef}>
+      <div 
+        className="tag-select-value" 
+        onClick={() => setIsOpen(!isOpen)}
+        style={{
+          backgroundColor: selectedOption ? selectedOption.bgColor : 'transparent',
+          color: selectedOption ? selectedOption.textColor : 'inherit',
+          borderColor: selectedOption ? 'transparent' : '#e2e8f0'
+        }}
+      >
+        <span className="tag-select-text">{selectedOption ? selectedOption.label : 'ไม่มี'}</span>
+        <ChevronDown size={14} opacity={0.6} />
+      </div>
+
+      {isOpen && (
+        <div className="tag-select-dropdown">
+          <div 
+            className="tag-select-option empty-option"
+            onClick={() => { onChange(''); setIsOpen(false); }}
+          >
+            (ไม่มี)
+          </div>
+          {options.map(opt => (
+            <div 
+              key={opt.id} 
+              className="tag-select-option"
+              onClick={() => { onChange(opt.id); setIsOpen(false); }}
+            >
+              <span 
+                className="tag-badge"
+                style={{ backgroundColor: opt.bgColor, color: opt.textColor }}
+              >
+                {opt.label}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TagSelect;

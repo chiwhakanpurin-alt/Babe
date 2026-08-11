@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-family: 'Prompt', -apple-system, sans-serif;
+  --surface-color: rgba(255, 255, 255, 0.45);
+  --surface-hover: rgba(255, 255, 255, 0.7);
+  --text-primary: #1e293b;
+  --text-secondary: #334155;
+  --border-color: rgba(255, 255, 255, 0.4);
+  --border-hover: rgba(255, 255, 255, 0.8);
+  --primary-color: #6366f1;
+  --primary-hover: #4f46e5;
+  --header-bg: rgba(255, 255, 255, 0.3);
+  --glass-blur: blur(20px);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: #f8fafc;
+  background-image: none;
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; 
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; 
+}

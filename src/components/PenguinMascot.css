@@ -1,0 +1,13 @@
+.penguin-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 50;
+  pointer-events: none; /* Allows clicking through the penguin */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+}
+
+.penguin-gif {
+  width: 120px;
+  height: auto;
+}
