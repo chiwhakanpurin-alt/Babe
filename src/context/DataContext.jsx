@@ -68,6 +68,27 @@ export const DataProvider = ({ children }) => {
     }));
   };
 
+  const exportData = () => {
+    const data = { rows, selectOptions };
+    // encodeURIComponent handles special characters like Thai before converting to Base64
+    return btoa(encodeURIComponent(JSON.stringify(data)));
+  };
+
+  const importData = (code) => {
+    try {
+      const data = JSON.parse(decodeURIComponent(atob(code)));
+      if (data && data.rows && data.selectOptions) {
+        setRows(data.rows);
+        setSelectOptions(data.selectOptions);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error("Failed to import data:", e);
+      return false;
+    }
+  };
+
   return (
     <DataContext.Provider value={{
       columns,
@@ -77,7 +98,9 @@ export const DataProvider = ({ children }) => {
       addRow,
       addOption,
       updateOption,
-      deleteOption
+      deleteOption,
+      exportData,
+      importData
     }}>
       {children}
     </DataContext.Provider>
