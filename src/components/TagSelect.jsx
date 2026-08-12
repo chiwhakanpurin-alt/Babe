@@ -24,10 +24,14 @@ const TagSelect = ({ value, optionsGroup, onChange }) => {
   const toggleDropdown = () => {
     if (!isOpen && dropdownRef.current) {
       const rect = dropdownRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
+      const scrollContainer = dropdownRef.current.closest('.table-container') || document.body;
+      const containerRect = scrollContainer.getBoundingClientRect();
       
-      if (spaceBelow < 250 && spaceAbove > spaceBelow) {
+      const spaceBelowContainer = containerRect.bottom - rect.bottom;
+      const spaceAboveContainer = rect.top - containerRect.top;
+      
+      // If space below in the container is less than 250px and there's more space above
+      if (spaceBelowContainer < 250 && spaceAboveContainer > spaceBelowContainer) {
         setDropdownPosition('top');
       } else {
         setDropdownPosition('bottom');
