@@ -1,5 +1,7 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { initialColumns, initialRows, initialSelectOptions } from '../constants/defaultData';
+import { db } from '../firebase';
+import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 
 const DataContext = createContext();
 
@@ -7,36 +9,44 @@ export const useData = () => useContext(DataContext);
 
 export const DataProvider = ({ children }) => {
   const [columns, setColumns] = useState(initialColumns);
-  const [rows, setRows] = useState(() => {
-    const saved = localStorage.getItem('tracker_rows');
-    return saved ? JSON.parse(saved) : initialRows;
-  });
-  const [selectOptions, setSelectOptions] = useState(() => {
-    const saved = localStorage.getItem('tracker_options');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return { ...initialSelectOptions, ...parsed };
-      } catch (e) {
-        return initialSelectOptions;
+  const [rows, setRows] = useState(initialRows);
+  const [selectOptions, setSelectOptions] = useState(initialSelectOptions);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Subscribe to real-time updates from Firestore
+  useEffect(() => {
+    const docRef = doc(db, 'boards', 'shared');
+    const unsubscribe = onSnapshot(docRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.rows) setRows(data.rows);
+        if (data.selectOptions) setSelectOptions(data.selectOptions);
       }
+      setIsLoaded(true);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Helper function to sync changes to Firestore
+  const syncToFirebase = async (newRows, newOptions) => {
+    if (!isLoaded) return;
+    try {
+      await setDoc(doc(db, 'boards', 'shared'), {
+        rows: newRows,
+        selectOptions: newOptions
+      }, { merge: true });
+    } catch (e) {
+      console.error("Error saving to Firebase:", e);
     }
-    return initialSelectOptions;
-  });
-
-  // Save to local storage on change
-  useEffect(() => {
-    localStorage.setItem('tracker_rows', JSON.stringify(rows));
-  }, [rows]);
-
-  useEffect(() => {
-    localStorage.setItem('tracker_options', JSON.stringify(selectOptions));
-  }, [selectOptions]);
+  };
 
   const updateRow = (rowId, colId, value) => {
-    setRows(prev => prev.map(row => 
+    const newRows = rows.map(row => 
       row.id === rowId ? { ...row, [colId]: value } : row
-    ));
+    );
+    setRows(newRows);
+    syncToFirebase(newRows, selectOptions);
   };
 
   const addRow = () => {
@@ -44,28 +54,36 @@ export const DataProvider = ({ children }) => {
     columns.forEach(col => {
       newRow[col.id] = '';
     });
-    setRows(prev => [...prev, newRow]);
+    const newRows = [...rows, newRow];
+    setRows(newRows);
+    syncToFirebase(newRows, selectOptions);
   };
 
   const addOption = (group, newOption) => {
-    setSelectOptions(prev => ({
-      ...prev,
-      [group]: [...(prev[group] || []), newOption]
-    }));
+    const newOptions = {
+      ...selectOptions,
+      [group]: [...(selectOptions[group] || []), newOption]
+    };
+    setSelectOptions(newOptions);
+    syncToFirebase(rows, newOptions);
   };
 
   const updateOption = (group, optionId, updatedOption) => {
-    setSelectOptions(prev => ({
-      ...prev,
-      [group]: prev[group].map(opt => opt.id === optionId ? updatedOption : opt)
-    }));
+    const newOptions = {
+      ...selectOptions,
+      [group]: selectOptions[group].map(opt => opt.id === optionId ? updatedOption : opt)
+    };
+    setSelectOptions(newOptions);
+    syncToFirebase(rows, newOptions);
   };
 
   const deleteOption = (group, optionId) => {
-    setSelectOptions(prev => ({
-      ...prev,
-      [group]: prev[group].filter(opt => opt.id !== optionId)
-    }));
+    const newOptions = {
+      ...selectOptions,
+      [group]: selectOptions[group].filter(opt => opt.id !== optionId)
+    };
+    setSelectOptions(newOptions);
+    syncToFirebase(rows, newOptions);
   };
 
   const exportData = () => {
