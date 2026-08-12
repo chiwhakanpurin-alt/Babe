@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext';
 
 const TagSelect = ({ value, optionsGroup, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState('bottom');
   const { selectOptions } = useData();
   const options = selectOptions[optionsGroup] || [];
   const dropdownRef = useRef(null);
@@ -20,11 +21,26 @@ const TagSelect = ({ value, optionsGroup, onChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const toggleDropdown = () => {
+    if (!isOpen && dropdownRef.current) {
+      const rect = dropdownRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      if (spaceBelow < 250 && spaceAbove > spaceBelow) {
+        setDropdownPosition('top');
+      } else {
+        setDropdownPosition('bottom');
+      }
+    }
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="tag-select-container" ref={dropdownRef}>
       <div 
         className="tag-select-value" 
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleDropdown}
         style={{
           backgroundColor: selectedOption ? selectedOption.bgColor : 'transparent',
           color: selectedOption ? selectedOption.textColor : 'inherit',
@@ -36,7 +52,15 @@ const TagSelect = ({ value, optionsGroup, onChange }) => {
       </div>
 
       {isOpen && (
-        <div className="tag-select-dropdown">
+        <div 
+          className="tag-select-dropdown"
+          style={{
+            bottom: dropdownPosition === 'top' ? '100%' : 'auto',
+            top: dropdownPosition === 'bottom' ? '100%' : 'auto',
+            marginBottom: dropdownPosition === 'top' ? '4px' : '0',
+            marginTop: dropdownPosition === 'bottom' ? '4px' : '0'
+          }}
+        >
           <div 
             className="tag-select-option empty-option"
             onClick={() => { onChange(''); setIsOpen(false); }}
